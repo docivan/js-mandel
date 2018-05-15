@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mandelbrot</title>
+
+<script>
+
+//configurable
+var framerate = 1;
+var pxlsz = 2;
+
+var xmin = 0.27085;
+var xmax = 0.27100;
+var ymin = 0.004640;
+var ymax = 0.004810;
+var maxiter = 256;
+
+//-0.743643887037158704752191506114774, 0.131825904205311970493132056385139
+//and magnification 1 .. 3.18 × 1031
+
+var xmin = -2;
+var xmax = 1;
+var ymin = -0.75;
+var ymax = 0.75;
+var maxiter = 500;
+
+var cx = -0.743643887037158704752191506114774;
+var cy = 0.131825904205311970493132056385139;
+var zoom = 1;
+
+//internal
+var __canvas, __canvas_context;
+var __scrw, __scrh;
+
+//var scrx = 0;
+//var scry = 0;
+
+var dx=(xmax-xmin)/__scrw;
+var dy=(ymax-ymin)/__scrh;
+
+function putpxl(x, y, col) {
+	__canvas_context.fillStyle= 'rgba('+col+')';
+	__canvas_context.fillRect(x*pxlsz, y*pxlsz, pxlsz,pxlsz);
+}
+
+function init() {
+	__canvas = document.getElementById("myCanvas");
+	__canvas_context = __canvas.getContext("2d");
+	__canvas_context.fillStyle= 'rgba(255,255,255,255)';
+	__canvas_context.fillRect(0,0,__canvas.width, __canvas.height);
+	
+	__scrw = __canvas.width/pxlsz;
+	__scrh = __canvas.height/pxlsz;
+	
+	dx=(xmax-xmin)/__scrw;
+	dy=(ymax-ymin)/__scrh;
+	
+	window.setInterval(function(){
+		main_loop();
+	}, 1000/framerate);
+	main_loop();
+}
+
+var colors = [
+	"66, 30, 15, 255",
+	"25, 7, 26, 255",
+	"9, 1, 47, 255",
+	"4, 4, 73, 255",
+	"0, 7, 100, 255",
+	"12, 44, 138, 255",
+	"24, 82, 177, 255",
+	"57, 125, 209, 255",
+	"134, 181, 229, 255",
+	"211, 236, 248, 255",
+	"241, 233, 191, 255",
+	"248, 201, 95, 255",
+	"255, 170, 0, 255",
+	"204, 128, 0, 255",
+	"153, 87, 0, 255",
+	"106, 52, 3, 255"
+];
+
+function main_loop() {
+	for(var scry = 0; scry<__scrh; scry++) {
+	for(var scrx = 0; scrx<__scrw; scrx++) {
+	
+	var x = xmin + dx*scrx;
+	var y = ymin + dy*scry;
+	
+	var u = 0;
+	var v = 0;
+	var u2 = 0;
+	var v2 = 0;
+	
+	var k = 1;
+	
+	for (; k < maxiter && (u2 + v2 < 4.0); k++) {
+		v = 2 * u * v + y;
+		u = u2 - v2 + x;
+		u2 = u * u;
+		v2 = v * v;
+	}
+	
+	if (k >= maxiter)
+		putpxl(scrx, scry, "0,0,0,255");
+	else
+		putpxl(scrx, scry, colors[k%16]);
+	
+	/*scrx++;
+	if(scrx>=__scrw) {
+		scrx=0;
+		
+		scry++;
+		if(scry>=__scrh) {
+			scry = 0;
+			
+			//TODO zoom into the set
+			return;
+		}
+	}*/
+	
+	}}
+	
+	xmin /= 1.1;
+	xmax /= 1.1;
+	ymin /= 1.1;
+	ymax /= 1.1;
+	//main_loop();
+	//flip buffer
+	//__canvas_context.drawImage(__canvas_buffer, 0, 0);
+}
+
+</script>
+
+</head>
+
+<body onload="init()">
+<canvas id="myCanvas" width="1000" height="500" >Your browser does not support the HTML5 canvas tag.</canvas>
+<div>
+</body>
+</html>
